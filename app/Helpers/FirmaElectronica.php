@@ -3,6 +3,7 @@ namespace App\Helpers;
 
 use App\Models\Contribuyente;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use SolucionTotal\CoreDTE\FirmaElectronica as CoreDTEFirmaElectronica;
@@ -11,7 +12,7 @@ class FirmaElectronica {
 
     public static function temporalPEM(){
         $cert = [];
-        $user = auth()->user();
+        $user = Auth::user();
         $p12 = Storage::get('certificados/'.$user->id.'.p12');
         openssl_pkcs12_read($p12, $cert, $user->certpass);
         if (!Storage::exists('certificados/cert'.$user->id.'.crt.pem')) {
