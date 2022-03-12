@@ -63,6 +63,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     Route::post('contribuyentes', [ContribuyenteController::class, 'storeContribuyente']);
     Route::post('attachuser', [AdministracionController::class, 'attachContribuyente']);

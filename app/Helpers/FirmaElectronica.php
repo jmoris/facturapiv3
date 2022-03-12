@@ -22,6 +22,8 @@ class FirmaElectronica {
         $urlkey = Storage::url('certificados/cert'.$user->id.'.key.pem');
         $firma = new CoreDTEFirmaElectronica([
             'data' => $p12,
+            'path_pkey' => storage_path('app/certificados/cert'.$user->id.'.key.pem'),
+            'path_cert' => storage_path('app/certificados/cert'.$user->id.'.crt.pem'),
             'pass' => $user->certpass,
         ]);
         return $firma;
