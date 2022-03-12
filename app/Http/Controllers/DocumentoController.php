@@ -410,7 +410,8 @@ class DocumentoController extends Controller
                     'error' => $validador->errors()
                 ]);
             }
-            $ambiente = env('AMBIENTE', 1);
+            $contribuyente = Contribuyente::where('rut', $request->contribuyente)->first();
+            $ambiente = $contribuyente->ambiente;
             \SolucionTotal\CoreDTE\Sii::setAmbiente($ambiente);
             $firma = HelpersFirmaElectronica::temporalPEM();
             $estado = \SolucionTotal\CoreDTE\Sii::estadoBoleta($firma, $request->contribuyente, $request->trackid);
