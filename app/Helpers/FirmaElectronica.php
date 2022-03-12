@@ -10,9 +10,13 @@ use SolucionTotal\CoreDTE\FirmaElectronica as CoreDTEFirmaElectronica;
 
 class FirmaElectronica {
 
-    public static function temporalPEM(){
+    public static function temporalPEM($user = null){
         $cert = [];
-        $user = Auth::user();
+        if($user == null){
+            $user = auth()->user();
+        }else{
+            $user = ['id' => $user];
+        }
         $p12 = Storage::get('certificados/'.$user->id.'.p12');
         openssl_pkcs12_read($p12, $cert, $user->certpass);
         if (!Storage::exists('certificados/cert'.$user->id.'.crt.pem')) {
