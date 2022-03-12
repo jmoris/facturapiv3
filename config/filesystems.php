@@ -53,6 +53,12 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
         ],
 
+        'tmp' => [
+            'driver' => 'local',
+            'root' => env('USE_LAMBDA_STORAGE', true) ? "/tmp" : storage_path('app/temp'),
+            'url' => env('USE_LAMBDA_STORAGE', true) ? "/tmp" : storage_path('app/temp'),
+        ],
+
     ],
 
     /*
