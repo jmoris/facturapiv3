@@ -47,7 +47,8 @@ class UploadDocumento implements ShouldQueue
             /produccion/contribuyentes/1/2021/12/Documentos
             /produccion/contribuyentes/1/2021/12/AEC
             */
-            $str_ambiente = 'produccion';
+            $ambiente = $this->contribuyente->ambiente;
+            $str_ambiente = ($ambiente==0)?'produccion':'certificacion';
             $path = $str_ambiente.'/contribuyentes/'.$this->contribuyente->id.'/'.date('Y', strtotime($this->fecha)).'/'.date('m', strtotime($this->fecha)).'/documentos/';
             Storage::put($path.'DTE'.$this->trackid.'.xml',  $this->xml);
         }catch(Exception $ex){
