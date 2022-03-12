@@ -21,6 +21,10 @@ class DatabaseSeeder extends Seeder
         $user->certpass = "Moris234";
         $user->is_admin = true;
         $user->save();
+
+        $this->call([
+            ComunasSeeder::class,
+        ]);
         // \App\Models\User::factory(10)->create();
     }
 }
