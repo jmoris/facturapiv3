@@ -189,7 +189,7 @@ class DocumentoController extends Controller
             }
             $dte = $boleta->getBoleta($firma, $folio);
             AgregarDocumentoEnvio::dispatch($dte->saveXML(), $numero, $request->tipo, $contribuyente)->onQueue('documento');
-            EnviarDocumentoSII::dispatch($contribuyente, auth()->user())->onQueue('envios')->delay(now()->addMinutes(1));
+            EnviarDocumentoSII::dispatch($contribuyente, $request->user())->onQueue('envios')->delay(now()->addMinutes(1));
             $montos = $dte->getTotales();
             if($ambiente==0){
                 $doc = new Boleta();
