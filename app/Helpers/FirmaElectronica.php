@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use SolucionTotal\CoreDTE\FirmaElectronica as CoreDTEFirmaElectronica;
+use stdClass;
 
 class FirmaElectronica {
 
@@ -14,8 +15,6 @@ class FirmaElectronica {
         $cert = [];
         if($user == null){
             $user = auth()->user();
-        }else{
-            $user = ['id' => $user];
         }
         $p12 = Storage::get('certificados/'.$user->id.'.p12');
         openssl_pkcs12_read($p12, $cert, $user->certpass);

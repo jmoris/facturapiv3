@@ -46,9 +46,9 @@ class EnviarDocumentoSII implements ShouldQueue
                 $this->user = auth()->user();
             }
             if(count($archivos) > 0){
-                $firma = FirmaElectronica::temporalPEM($this->user->id);
+                $firma = FirmaElectronica::temporalPEM($this->user);
 
-                $ambiente = 0;
+                $ambiente = $this->contribuyente->ambiente;
 
                 $caratula = [
                     'RutEnvia' => $firma->getID(),
