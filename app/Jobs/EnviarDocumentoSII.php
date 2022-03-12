@@ -42,7 +42,7 @@ class EnviarDocumentoSII implements ShouldQueue
             $path = $this->contribuyente->id;
             $archivos = Storage::disk('tmp')->files($path);
             if(count($archivos) > 0){
-                $firma = FirmaElectronica::temporalPEM();
+                $firma = FirmaElectronica::temporalPEM(auth()->user()->id);
 
                 $ambiente = 0;
 
