@@ -20,15 +20,16 @@ class EnviarDocumentoSII implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private $contribuyente;
-
+    private $user;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($contribuyente)
+    public function __construct($contribuyente, $user)
     {
         $this->contribuyente = $contribuyente;
+        $this->user = $user;
     }
 
     /**
@@ -41,8 +42,11 @@ class EnviarDocumentoSII implements ShouldQueue
         try{
             $path = $this->contribuyente->id;
             $archivos = Storage::disk('tmp')->files($path);
+            if($this->user == null){
+                $this->user = auth()->user();
+            }
             if(count($archivos) > 0){
-                $firma = FirmaElectronica::temporalPEM(auth()->user()->id);
+                $firma = FirmaElectronica::temporalPEM($this->user->id);
 
                 $ambiente = 0;
 

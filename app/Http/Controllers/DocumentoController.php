@@ -6,6 +6,7 @@ use App\Helpers\FirmaElectronica as HelpersFirmaElectronica;
 use App\Helpers\Formatos;
 use App\Helpers\Herramientas;
 use App\Jobs\AgregarDocumentoEnvio;
+use App\Jobs\EnviarDocumentoSII;
 use App\Jobs\UploadDocumentoTmp;
 use App\Models\Acteco;
 use App\Models\Boleta;
@@ -188,6 +189,7 @@ class DocumentoController extends Controller
             }
             $dte = $boleta->getBoleta($firma, $folio);
             AgregarDocumentoEnvio::dispatch($dte->saveXML(), $numero, $request->tipo, $contribuyente)->onQueue('documento');
+            EnviarDocumentoSII::dispatch($contribuyente, auth()->user()->id)->onQueue('envios')->delay(now()->addMinutes(1));
             $montos = $dte->getTotales();
             if($ambiente==0){
                 $doc = new Boleta();

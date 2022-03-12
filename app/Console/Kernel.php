@@ -22,13 +22,14 @@ class Kernel extends ConsoleKernel
         $schedule->call(function(){
             ActualizarContribuyentes::dispatch()->onQueue('sincronizacion');
         })->weekly();
-
+        /* NO FUNCIONA YA QUE HAY QUE PASARLE EL USUARIO QUE HACE EL ENVIO DE LOS DOCUMENTOSVBN
         $schedule->call(function () {
             $contribuyentes = Contribuyente::all();
             foreach($contribuyentes as $ctr){
-                EnviarDocumentoSII::dispatch($ctr)->onQueue('envios');
+                EnviarDocumentoSII::dispatch($ctr, 1)->onQueue('envios');
             }
         })->everyMinute();
+        */
     }
 
     /**
