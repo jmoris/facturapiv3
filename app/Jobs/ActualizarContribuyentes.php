@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Helpers\FirmaElectronica;
 use App\Models\InfoContribuyente;
+use App\Models\User;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -35,7 +36,8 @@ class ActualizarContribuyentes implements ShouldQueue
      */
     public function handle()
     {
-        $firma = FirmaElectronica::temporalPEM();
+        $user = User::find(1);
+        $firma = FirmaElectronica::temporalPEM($user);
         $cookies = \SolucionTotal\CoreDTE\Sii\Autenticacion::requestCookies($firma);
         Sii::setAmbiente(Sii::PRODUCCION);
         ini_set('memory_limit', '1024M');
