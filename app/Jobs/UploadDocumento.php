@@ -41,6 +41,7 @@ class UploadDocumento implements ShouldQueue
      */
     public function handle()
     {
+        Log::info("Entro a UploadDocumento");
         try{
             /*
             /produccion/contribuyentes/1/2021/12/RCOF
