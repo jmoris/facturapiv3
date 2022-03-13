@@ -173,12 +173,6 @@ class DocumentoController extends Controller
             $detalles = $request->detalles;
             if($detalles == null){
                 $detalles = [];
-                array_push($detalles, [
-                    'nombre' => 'Sin detalle',
-                    'unidad' => 'Und',
-                    'cantidad' => 1,
-                    'precio' => 990
-                ]);
             }
             foreach($detalles as $detalle){
                 $det = new Detalle($detalle['nombre'], $detalle['unidad'], $detalle['cantidad'], $detalle['precio']);
@@ -658,9 +652,9 @@ class DocumentoController extends Controller
                     'error' => $validador->errors()
                 ]);
             }
-            $ambiente = env('AMBIENTE', 0);
             // Se busca el contribuyente y se fija el ambiente en el que se trabajara
             $contribuyente = Contribuyente::where('rut', $request->contribuyente)->first();
+            $ambiente = $contribuyente->ambiente;
             \SolucionTotal\CoreDTE\Sii::setAmbiente($ambiente);
             // Se obtiene la firma electronica
             $firma = HelpersFirmaElectronica::temporalPEM();
@@ -774,7 +768,7 @@ class DocumentoController extends Controller
                 $documento->setDetalle($det);
             }
             $dte = $documento->getDocumento($firma, $folio);
-            AgregarDocumentoEnvio::dispatch($dte->saveXML(), $numero, $request->tipo, $contribuyente)->onQueue('documento');
+            //AgregarDocumentoEnvio::dispatch($dte->saveXML(), $numero, $request->tipo, $contribuyente)->onQueue('documento');
             $montos = $dte->getTotales();
             if($ambiente == 0){
                 $doc = new Documento();
