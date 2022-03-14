@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\GenerarRCOF;
 use App\Models\Contribuyente;
+use App\Models\RCOF;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class AdministracionController extends Controller
@@ -68,6 +71,42 @@ class AdministracionController extends Controller
             return response()->json([
                 'status' => 500,
                 'error' => $ex->getMessage()
+            ]);
+        }
+    }
+
+    public function forceRCOF(){
+        try{
+            $c = 0;
+            $contribuyentes = Contribuyente::all();
+            foreach($contribuyentes as $contribuyente){
+                Log::info("Se pone en cola generar RCOF del contribuyente ".$contribuyente->rut);
+                $rcof = RCOF::where('ref_contribuyente', $contribuyente->id)->where('fecha', date('Y-m-d', strtotime('-1 day')))->first();
+                if($rcof == null){
+                    Log::info("Se pone en cola generar RCOF del contribuyente ".$contribuyente->rut. ' ya que no se genero correctamente.');
+                    $usuarios = $contribuyente->users;
+                    $usuario = null;
+                    if(count($usuarios) > 0){
+                        $usuario = $usuarios[0];
+                    }
+                    if($usuario != null){
+                        GenerarRCOF::dispatch($contribuyente, $usuario)->onQueue('documento');
+                        Contribuyente::where('id', $contribuyente->id)->update([
+                            'contador_boletas' => $contribuyente->contador_boletas + 5,
+                        ]);
+                        $c++;
+                    }
+                }
+            }
+            return response()->json([
+                'status' => 200,
+                'msg' => 'Se enviaron '.$c.' RCOFs correctamente.'
+            ]);
+        }catch(Exception $ex){
+            Log::error($ex);
+            return response()->json([
+                'status' => 500,
+                'msg' => 'Hubo problemas para generar los RCOF.'
             ]);
         }
     }

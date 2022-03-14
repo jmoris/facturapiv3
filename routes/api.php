@@ -9,6 +9,7 @@ use App\Jobs\DescargarActecos;
 use App\Models\Acteco;
 use App\Models\InfoContribuyente;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use SolucionTotal\CoreDTE\Sii;
@@ -31,12 +32,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('statuscert', function(){
         return (FirmaElectronica::statusCert())? 'vigente': 'invalido';
     });
-    Route::get('infocontribuyente', function(Request $request){
-        $firma = FirmaElectronica::temporalPEM();
-        $cookies = \SolucionTotal\CoreDTE\Sii\Autenticacion::requestCookies($firma);
-        $info = Sii::getInfoCompletaContribuyente($request->rut, $cookies);
-        return $info;
-    });
 
     /* BOLETAS */
     Route::post('boleta', [DocumentoController::class, 'storeBoleta']);
@@ -57,41 +52,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     /* CONTRIBUYENTES */
     Route::get('informacion', [ContribuyenteController::class, 'getContribuyente']);
+    Route::get('infocontribuyente', [ContribuyenteController::class, 'getInfoContribuyente']);
 
-    Route::post('forzarrcof', function(){
-        $contribuyentes = \App\Models\Contribuyente::all();
-        foreach($contribuyentes as $contribuyente){
-        //    if($contribuyente->boleta_produccion == true){
-                \Illuminate\Support\Facades\Log::info("Se pone en cola generar RCOF del contribuyente ".$contribuyente->rut);
-                $rcof = \App\Models\RCOF::where('ref_contribuyente', $contribuyente->id)->where('fecha', date('Y-m-d', strtotime('-1 day')))->first();
-                if($rcof == null){
-                    \Illuminate\Support\Facades\Log::info("Se pone en cola generar RCOF del contribuyente ".$contribuyente->rut. ' ya que no se genero correctamente.');
-                    $usuario = $contribuyente->users[0];
-                    if($usuario != null){
-                        \App\Jobs\GenerarRCOF::dispatch($contribuyente, $usuario)->onQueue('documento');
-                        \App\Models\Contribuyente::where('id', $contribuyente->id)->update([
-                            'contador_boletas' => $contribuyente->contador_boletas + 5,
-                        ]);
-                    }
-                }
-        //    }
-        }
-    });
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
-
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     Route::post('contribuyentes', [ContribuyenteController::class, 'storeContribuyente']);
     Route::post('attachuser', [AdministracionController::class, 'attachContribuyente']);
     Route::post('detachuser', [AdministracionController::class, 'detachContribuyente']);
-});
-
-Route::get('usuarios', function(){
-    $contribuyente = App\Models\Contribuyente::where('rut', '77192227-9')->first();
-    return $contribuyente->users[0];
+    Route::post('forzarrcof', [AdministracionController::class, 'forceRCOF']);
 });

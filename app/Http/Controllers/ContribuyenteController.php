@@ -8,11 +8,13 @@ use App\Models\Comuna;
 use App\Models\ConfigContribuyente;
 use App\Models\Contribuyente;
 use App\Models\DireccionContribuyente;
+use App\Models\InfoContribuyente;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use SolucionTotal\CoreDTE\FirmaElectronica;
 use SolucionTotal\CoreDTE\Sii;
 
 class ContribuyenteController extends Controller
@@ -155,5 +157,12 @@ class ContribuyenteController extends Controller
         }catch(Exception $ex){
             return $ex;
         }
+    }
+
+    public function getInfoContribuyente(Request $request){
+        $firma = HelperFirmaElectronica::temporalPEM();
+        $cookies = \SolucionTotal\CoreDTE\Sii\Autenticacion::requestCookies($firma);
+        $info = Sii::getInfoContribuyente($request->rut, $cookies);
+        return $info;
     }
 }

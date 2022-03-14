@@ -29,20 +29,24 @@ class Kernel extends ConsoleKernel
         $schedule->call(function(){
             $contribuyentes = Contribuyente::all();
             foreach($contribuyentes as $contribuyente){
-            //    if($contribuyente->boleta_produccion == true){
+                if($contribuyente->boleta_produccion == true){
                     Log::info("Se pone en cola generar RCOF del contribuyente ".$contribuyente->rut);
                     $rcof = RCOF::where('ref_contribuyente', $contribuyente->id)->where('fecha', date('Y-m-d', strtotime('-1 day')))->first();
                     if($rcof == null){
                         Log::info("Se pone en cola generar RCOF del contribuyente ".$contribuyente->rut. ' ya que no se genero correctamente.');
-                        $usuario = $contribuyente->users[0];
+                        $usuarios = $contribuyente->users;
+                        $usuario = null;
+                        if(count($usuarios) > 0){
+                            $usuario = $usuarios[0];
+                        }
                         if($usuario != null){
-                            GenerarRCOF::dispatch($contribuyente, $usuario)->onQueue('documento');
-                            Contribuyente::where('id', $contribuyente->id)->update([
+                            \App\Jobs\GenerarRCOF::dispatch($contribuyente, $usuario)->onQueue('documento');
+                            \App\Models\Contribuyente::where('id', $contribuyente->id)->update([
                                 'contador_boletas' => $contribuyente->contador_boletas + 5,
                             ]);
                         }
                     }
-            //    }
+                }
             }
         })->dailyAt('02:00');
     }
