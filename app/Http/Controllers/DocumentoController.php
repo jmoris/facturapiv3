@@ -638,10 +638,10 @@ class DocumentoController extends Controller
                 'acteco' => 'required',
                 'tipo' => ['required', Rule::in(['33', '34', '52', '56', '61']),],
                 'fecha' => 'nullable|date',
-                'receptor' => 'nullable',
+                'receptor' => 'required',
                 'sucursal' => 'nullable',
                 'forma_pago' => 'nullable',
-                'detalles' => 'nullable|array',
+                'detalles' => 'required|array',
                 'referencias' => 'nullable|array',
             ]);
 
@@ -750,12 +750,16 @@ class DocumentoController extends Controller
             if($request->forma_pago != null){
                 $documento->setFormaPago($request->forma_pago);
             }
-
+            // Se asigna el folio al documento
             $documento->setFolio($numero);
-
-            foreach($request->referencias as $referencia){
+            // Se verifica referencias, en caso de ser nulas, se crea un arreglo vacico
+            $referencias = $request->referencias;
+            if($referencias == null)
+                $referencias = [];
+            foreach($referencias as $referencia){
                 $documento->setReferencia($referencia['tipo'], $referencia['folio'], $referencia['fecha'], $referencia['razon'], $referencia['codigo']);
             }
+
             foreach($request->detalles as $detalle){
                 $det = new Detalle($detalle['nombre'], $detalle['unidad'], $detalle['precio'], $detalle['cantidad']);
 

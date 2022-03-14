@@ -70,3 +70,8 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('attachuser', [AdministracionController::class, 'attachContribuyente']);
     Route::post('detachuser', [AdministracionController::class, 'detachContribuyente']);
 });
+
+Route::get('usuarios', function(){
+    $contribuyente = App\Models\Contribuyente::where('rut', '77192227-9')->first();
+    return $contribuyente->users[0];
+});

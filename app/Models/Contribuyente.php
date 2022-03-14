@@ -37,7 +37,7 @@ class Contribuyente extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'contribuyentes_users');
+        return $this->belongsToMany(User::class, 'contribuyentes_users', 'ref_contribuyente', 'ref_user');
     }
 
     public function config(){
