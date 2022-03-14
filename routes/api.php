@@ -57,6 +57,26 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     /* CONTRIBUYENTES */
     Route::get('informacion', [ContribuyenteController::class, 'getContribuyente']);
+
+    Route::post('forzarrcof', function(){
+        $contribuyentes = \App\Models\Contribuyente::all();
+        foreach($contribuyentes as $contribuyente){
+        //    if($contribuyente->boleta_produccion == true){
+                \Illuminate\Support\Facades\Log::info("Se pone en cola generar RCOF del contribuyente ".$contribuyente->rut);
+                $rcof = \App\Models\RCOF::where('ref_contribuyente', $contribuyente->id)->where('fecha', date('Y-m-d', strtotime('-1 day')))->first();
+                if($rcof == null){
+                    \Illuminate\Support\Facades\Log::info("Se pone en cola generar RCOF del contribuyente ".$contribuyente->rut. ' ya que no se genero correctamente.');
+                    $usuario = $contribuyente->users[0];
+                    if($usuario != null){
+                        \App\Jobs\GenerarRCOF::dispatch($contribuyente, $usuario)->onQueue('documento');
+                        \App\Models\Contribuyente::where('id', $contribuyente->id)->update([
+                            'contador_boletas' => $contribuyente->contador_boletas + 5,
+                        ]);
+                    }
+                }
+        //    }
+        }
+    });
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
