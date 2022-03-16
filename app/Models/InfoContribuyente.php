@@ -9,7 +9,7 @@ class InfoContribuyente extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'rut';
-
-    public $incrementing = false;
+    public function actecos(){
+        return $this->belongsToMany(Acteco::class, 'acteco_info_contribuyentes', 'ref_icontribuyente', 'ref_acteco');
+    }
 }

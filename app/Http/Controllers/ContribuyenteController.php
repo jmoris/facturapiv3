@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\FirmaElectronica as HelperFirmaElectronica;
 use App\Models\Acteco;
+use App\Models\ActecoInfoContribuyente;
 use App\Models\Comuna;
 use App\Models\ConfigContribuyente;
 use App\Models\Contribuyente;
@@ -71,6 +72,7 @@ class ContribuyenteController extends Controller
             'path' => Storage::url($path.'cert.p12')
         ]);
     }
+
     public function storeContribuyente(Request $request){
         try{
             $validated = Validator::make($request->all(), [
@@ -155,14 +157,58 @@ class ContribuyenteController extends Controller
             $contribuyente = Contribuyente::where('rut', $request->contribuyente)->with('direcciones')->with('actecos')->first();
             return $contribuyente;
         }catch(Exception $ex){
+            return response()->json([
+                'status' => 500,
+                'error' => 'Hubo problemas para obtener la información del contribuyente.'
+            ]);
             return $ex;
         }
     }
 
     public function getInfoContribuyente(Request $request){
-        $firma = HelperFirmaElectronica::temporalPEM();
-        $cookies = \SolucionTotal\CoreDTE\Sii\Autenticacion::requestCookies($firma);
-        $info = Sii::getInfoContribuyente($request->rut, $cookies);
-        return $info;
+        try{
+            $contribuyente = InfoContribuyente::where('rut', $request->rut)->first();
+            if($contribuyente != null){
+                $data = [
+                    'RAZONSOCIAL' => $contribuyente->razon_social,
+                    'RUT' => $contribuyente->rut,
+                    'GIROS' => [],
+                    'CORREO' => $contribuyente->correo_dte
+                ];
+                foreach($contribuyente->actecos as $acteco){
+                    array_push($data['GIROS'], [
+                        'DESCRIPCION' => preg_replace('!\s+!', ' ', $acteco->descripcion),
+                        'CODIGO' => $acteco->id
+                    ]);
+                }
+                return response()->json($data);
+            }else{
+                $firma = HelperFirmaElectronica::temporalPEM();
+                $cookies = \SolucionTotal\CoreDTE\Sii\Autenticacion::requestCookies($firma);
+                $info = Sii::getInfoContribuyente($request->rut, $cookies);
+
+                $infoc = new InfoContribuyente();
+                $infoc->rut = $info['RUT'];
+                $infoc->razon_social = $info['RAZONSOCIAL'];
+                $infoc->correo_dte = $info['CORREO'];
+                $infoc->save();
+                $giros = $info['GIROS'];
+                if(count($giros)>0){
+                    foreach($info['GIROS'] as $giro){
+                        $acteco = new ActecoInfoContribuyente();
+                        $acteco->ref_icontribuyente = $infoc->id;
+                        $acteco->ref_acteco = $giro['CODIGO'];
+                        $acteco->save();
+                    }
+                }
+                return $info;
+            }
+        }catch(Exception $ex){
+            Log::error($ex);
+            return response()->json([
+                'status' => '500',
+                'msg' => 'No se pudo obtener información del contribuyente.'
+            ]);
+        }
     }
 }

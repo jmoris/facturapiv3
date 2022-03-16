@@ -21,6 +21,15 @@ class CreateDocumentosTable extends Migration
             $table->smallInteger('metodo_pago')->default(0);
             $table->bigInteger('ref_cliente')->nullable()->unsigned();
             $table->string('trackid')->nullable();
+            /*
+                ESTADOS DEL DOCUMENTO:
+                    0 => EN PROCESO
+                    1 => ACEPTADO
+                    2 => ACEPTADO CON REPAROS
+                    3 => RECHAZADO
+                    4 => ACEPTADO POR ND
+            */
+            $table->smallInteger('estado')->default(0);
             $table->bigInteger('monto_neto')->default(0);
             $table->bigInteger('monto_iva')->default(0);
             $table->bigInteger('monto_exento')->default(0);

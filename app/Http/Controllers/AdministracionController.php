@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class AdministracionController extends Controller
 {
@@ -71,6 +72,31 @@ class AdministracionController extends Controller
             return response()->json([
                 'status' => 500,
                 'error' => $ex->getMessage()
+            ]);
+        }
+    }
+
+    public function changeAmbiente(Request $request){
+        try{
+            $validated = Validator::make($request->all(), [
+                'contribuyente' => 'required|exists:contribuyentes,rut',
+                'ambiente' => ['required', Rule::in([0,1])],
+            ]);
+
+            if ($validated->fails()) {
+                return response()->json([
+                    'status' => 500,
+                    'msg' => 'No se pudieron validar los datos',
+                    'error' => $validated->errors()
+                ]);
+            }
+            $contribuyente = Contribuyente::where('rut', $request->contribuyente)->first();
+            $contribuyente->ambiente = $request->ambiente;
+            $contribuyente->save();
+        }catch(Exception $ex){
+            return response()->json([
+                'status' => 500,
+                'msg' => 'No se pudo cambiar el ambiente del contribuyente.'
             ]);
         }
     }

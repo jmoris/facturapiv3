@@ -14,10 +14,9 @@ class CreateInfoContribuyentesTable extends Migration
     public function up()
     {
         Schema::create('info_contribuyentes', function (Blueprint $table) {
-            $table->string('rut')->unique()->primary();
+            $table->id();
+            $table->string('rut')->unique();
             $table->string('razon_social');
-            $table->integer('nro_resolucion');
-            $table->date('fch_resolucion');
             $table->string('correo_dte');
             $table->timestamps();
         });
