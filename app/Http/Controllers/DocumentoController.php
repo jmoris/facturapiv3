@@ -510,8 +510,7 @@ class DocumentoController extends Controller
             if ($request->tipo == 0) {
                 $datos['Encabezado']['IdDoc']['TipoDTE'] = 0;
             }
-
-            $pdf = new \SolucionTotal\CorePDF\PDF($datos, $request->papel, $request->logo, $request->poslogo, $dte->getTED());
+            $pdf = new \SolucionTotal\CorePDF\PDF($datos, 1, 'https://soluciontotal.cl/logost.png', 1, $dte->getTED());
             //$pdf->setLeyendaImpresion('Sistema de facturación por SoluciónTotal');
             //$pdf->setMarcaAgua($config->path_logo);
             //$pdf->setTelefono($cbt->telefono);
@@ -523,6 +522,7 @@ class DocumentoController extends Controller
             $pdf->construir();
             $pdf->generar(1);
         }catch(Exception $ex){
+            return $ex;
             return response()->json([
                 'status' => 500,
                 'msg' => 'Hubo un error al intentar generar el PDF del XML.'
@@ -778,6 +778,7 @@ class DocumentoController extends Controller
                     $documento = new \SolucionTotal\CoreDTE\Modelos\NotaCredito(date('Y-m-d', strtotime($fecha)), $emisor, $receptor);
                     break;
             }
+            $documento->setFechaVencimiento(date('Y-m-d', strtotime($fecha)));
 
             if($request->forma_pago != null){
                 $documento->setFormaPago($request->forma_pago);
@@ -794,7 +795,9 @@ class DocumentoController extends Controller
 
             foreach($request->detalles as $detalle){
                 $det = new Detalle($detalle['nombre'], $detalle['unidad'], $detalle['precio'], $detalle['cantidad']);
-
+                if(isset($detalle['descripcion'])){
+                    $det->setDescripcion($detalle['descripcion']);
+                }
                 if(isset($detalle['descuento'])){
                     $det->setDescuento($detalle['descuento']);
                 }
