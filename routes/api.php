@@ -64,5 +64,6 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('contribuyentes', [ContribuyenteController::class, 'storeContribuyente']);
     Route::post('attachuser', [AdministracionController::class, 'attachContribuyente']);
     Route::post('detachuser', [AdministracionController::class, 'detachContribuyente']);
+    Route::post('cambiarambiente', [AdministracionController::class, 'changeAmbiente']);
     Route::post('forzarrcof', [AdministracionController::class, 'forceRCOF']);
 });
