@@ -7,6 +7,7 @@ use App\Http\Controllers\ContribuyenteController;
 use App\Http\Controllers\DocumentoController;
 use App\Jobs\DescargarActecos;
 use App\Models\Acteco;
+use App\Models\Documento;
 use App\Models\InfoContribuyente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -49,6 +50,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('documento/reimpresion', [DocumentoController::class, 'reimprimirDocumento']);
     Route::post('documento/folios', [DocumentoController::class, 'cargarFolios']);
     Route::post('documento/ver', [DocumentoController::class, 'generarPDF']);
+    Route::post('documento/verxml', [DocumentoController::class, 'generarPDFdeXML']);
 
     /* CONTRIBUYENTES */
     Route::get('informacion', [ContribuyenteController::class, 'getContribuyente']);

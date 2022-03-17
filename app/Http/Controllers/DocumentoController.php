@@ -456,14 +456,14 @@ class DocumentoController extends Controller
 
             $domicilio = DireccionContribuyente::where('ref_contribuyente', $contribuyente->id)->where('tipo', 'DOMICILIO')->first();
 
-            $ambiente = 0;
+            $ambiente = $contribuyente->ambiente;
             $str_ambiente = ($ambiente)?'certificacion':'produccion';
             $path = $str_ambiente.'/contribuyentes/'.$contribuyente->id.'/'.date('Y', strtotime($documento->fecha)).'/'.date('m', strtotime($documento->fecha)).'/documentos/';
             $xml = null;
             if(Storage::exists($path.'DTE'.$documento->trackid.'.xml')) {
                 $xml = Storage::get($path.'DTE'.$documento->trackid.'.xml');
             }else{
-                $xml = Storage::disk('tmp')->get($contribuyente->id.'/DTET'.$documento->tipo.'F'.$documento->folio.'.xml');
+                $xml = Storage::get($path.'/DTET'.$documento->tipo.'F'.$documento->folio.'.xml');
             }
             $EnvioDTEg = new \SolucionTotal\CoreDTE\Sii\EnvioDte();
             $EnvioDTEg->loadXML($xml);
@@ -494,6 +494,38 @@ class DocumentoController extends Controller
             return response()->json([
                 'status' => 500,
                 'msg' => 'Hubo un error al intentar generar el PDF'
+            ]);
+        }
+    }
+
+    public function generarPDFdeXML(Request $request){
+        try{
+            $file = $request->documento;
+            $xml = file_get_contents($file);
+            $EnvioDTEg = new \SolucionTotal\CoreDTE\Sii\EnvioDte();
+            $EnvioDTEg->loadXML($xml);
+            $caratula = $EnvioDTEg->getCaratula();
+            $dte = $EnvioDTEg->getDocumentos()[0];
+            $datos = $dte->getDatos();
+            if ($request->tipo == 0) {
+                $datos['Encabezado']['IdDoc']['TipoDTE'] = 0;
+            }
+
+            $pdf = new \SolucionTotal\CorePDF\PDF($datos, $request->papel, $request->logo, $request->poslogo, $dte->getTED());
+            //$pdf->setLeyendaImpresion('Sistema de facturación por SoluciónTotal');
+            //$pdf->setMarcaAgua($config->path_logo);
+            //$pdf->setTelefono($cbt->telefono);
+            //$pdf->setMail($cbt->mail);
+            //$pdf->setWeb($cbt->web);
+            $pdf->setResolucion(date('Y', strtotime($caratula['FchResol'])), $caratula['NroResol']);
+            /*if($doc->glosa != '')
+                $pdf->setGlosa($doc->glosa);*/
+            $pdf->construir();
+            $pdf->generar(1);
+        }catch(Exception $ex){
+            return response()->json([
+                'status' => 500,
+                'msg' => 'Hubo un error al intentar generar el PDF del XML.'
             ]);
         }
     }
@@ -795,6 +827,9 @@ class DocumentoController extends Controller
 
                 $doc->monto_total = $montos['MntTotal'];
                 $doc->save();
+
+                // Se agrega el documento a la cola de revisión de estados para saber si esta aceptado/rechazado
+
             }
             $envio = new EnvioDte();
             $envio->agregar($dte);
