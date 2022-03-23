@@ -161,7 +161,6 @@ class ContribuyenteController extends Controller
                 'status' => 500,
                 'error' => 'Hubo problemas para obtener la información del contribuyente.'
             ]);
-            return $ex;
         }
     }
 
