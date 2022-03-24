@@ -9,6 +9,8 @@ class DireccionContribuyente extends Model
 {
     use HasFactory;
 
+    protected $hidden = ['pivot'];
+
     public function contribuyente()
     {
         return $this->belongsTo(Contribuyente::class);

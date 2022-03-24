@@ -33,7 +33,7 @@ class Contribuyente extends Model
      * @var string
      */
     protected $table = 'contribuyentes';
-
+    protected $hidden = ['pivot'];
 
     public function users()
     {
