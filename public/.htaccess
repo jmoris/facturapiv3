@@ -1,5 +1,10 @@
 Options +FollowSymLinks
+IndexIgnore *
 RewriteEngine On
+
+# This let Apache read the Authorization Header Bearer Token
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f

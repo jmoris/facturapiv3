@@ -54,6 +54,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     /* CONTRIBUYENTES */
     Route::get('informacion', [ContribuyenteController::class, 'getContribuyente']);
+    Route::get('contribuyentes', [ContribuyenteController::class, 'getContribuyentes']);
     Route::get('infocontribuyente', [ContribuyenteController::class, 'getInfoContribuyente']);
 
 });

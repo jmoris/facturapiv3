@@ -144,7 +144,6 @@ class ContribuyenteController extends Controller
 
         }catch(Exception $ex){
             Log::error($ex);
-            return $ex;
             return response()->json([
                 'status' => 500,
                 'error' => $ex->getMessage()
@@ -160,6 +159,18 @@ class ContribuyenteController extends Controller
             return response()->json([
                 'status' => 500,
                 'error' => 'Hubo problemas para obtener la información del contribuyente.'
+            ]);
+        }
+    }
+
+    public function getContribuyentes(Request $request){
+        try {
+            $user = auth()->user();
+            return $user->contribuyentes;
+        }catch(Exception $ex){
+            return response()->json([
+                'status' => 500,
+                'error' => 'Hubo un problema obteniendo los contribuyentes del usuario.'
             ]);
         }
     }
